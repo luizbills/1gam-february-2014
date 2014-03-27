@@ -15,9 +15,9 @@ State.Boot.prototype = {
 
     if (this.game.device.desktop) {
       // configuration to itch.io
-      if (this.game.net.getHostName().indexOf('itch.io') !== -1) {
+      if (document.URL.indexOf('itchio') !== -1) {
         document.body.style.width = config.width + 'px';
-        document.body.style.height = config.height + 'px';
+        document.body.style.height = config.height + 1 + 'px';
       } else {
         this.scale.pageAlignHorizontally = true;
         this.scale.pageAlignVertically = true;
