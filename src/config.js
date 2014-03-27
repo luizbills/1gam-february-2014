@@ -1,7 +1,7 @@
 window.config = {
   width: 256,
   height: 512,
-  id: 'game'
+  id: 'game-viewport'
 };
 
 window.State = {};

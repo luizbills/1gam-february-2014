@@ -1,27 +1,17 @@
-
-State.MainMenu = function (game) {
-
-	this.music = null;
-
-};
+State.MainMenu = function(game) {};
 
 State.MainMenu.prototype = {
 
-	create: function () {
-		var title, start, credits, help;
+  create: function() {
+    var title, start, credits, help;
 
-		// start music
-		if (!this.music) {
-			this.music = this.add.audio('gameMusic', 1, true);
-			this.music.play();
-		}
+    title = this.add.text(this.world.centerX, 120,
+      "Run Link!", {
+        font: "50px Arial bold",
+        fill: "#60BF49",
+        align: "center"
+      });
 
-		title = this.add.text(this.world.centerX, 120,
-			"Run Link!", {
-      font: "50px Arial bold",
-      fill: "#60BF49",
-      align: "center"
-    });
     title.anchor.x = 0.5;
 
     start = this.add.text(this.world.centerX, this.world.centerY, "start game", this._styleSelected);
@@ -46,7 +36,7 @@ State.MainMenu.prototype = {
       this.keyDown.onDown.add(this.processKey, this);
       this.keyEnter.onDown.add(this.changeState, this);
     }
-	},
+  },
 
   _styleNormal: {
     font: "20px Arial",
@@ -61,7 +51,7 @@ State.MainMenu.prototype = {
   },
 
   processKey: function() {
-    this.options[this.currentOption].font = this._styleNormal;
+    this.options[this.currentOption].setStyle(this._styleNormal);
 
     if (this.keyUp.isDown) {
       this.currentOption--;
@@ -71,19 +61,19 @@ State.MainMenu.prototype = {
 
     this.currentOption = Phaser.Math.clamp(this.currentOption, 0, 2);
 
-    this.options[this.currentOption].font = this._styleSelected;
+    this.options[this.currentOption].setStyle(this._styleSelected);
   },
 
   processTouch: function() {
     // TODO: implement mobile input
   },
 
-	changeState: function (pointer) {
+  changeState: function(pointer) {
     this.input.keyboard.removeKey(Phaser.Keyboard.UP);
     this.input.keyboard.removeKey(Phaser.Keyboard.DOWN);
     this.input.keyboard.removeKey(Phaser.Keyboard.ENTER);
 
-    switch(this.currentOption) {
+    switch (this.currentOption) {
       case 0:
         this.game.state.start('Game');
         break;
@@ -96,6 +86,6 @@ State.MainMenu.prototype = {
       default:
         this.game.state.start('Game');
     }
-	}
+  }
 
 };

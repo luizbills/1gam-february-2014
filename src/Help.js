@@ -1,10 +1,8 @@
-
-State.Help = function (game) {
-};
+State.Help = function(game) {};
 
 State.Help.prototype = {
 
-  create: function () {
+  create: function() {
     var text =
       "Avoid of balls and\n" +
       "collect crystals.\n\n" +
@@ -31,6 +29,5 @@ State.Help.prototype = {
     this.input.keyboard.removeKey(Phaser.Keyboard.ENTER);
     this.game.state.start('MainMenu');
   }
-
 
 };

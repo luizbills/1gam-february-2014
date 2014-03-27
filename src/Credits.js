@@ -1,15 +1,11 @@
-
-State.Credits = function (game) {
-};
+State.Credits = function(game) {};
 
 State.Credits.prototype = {
 
-  create: function () {
+  create: function() {
     var text =
       "Coder & Design\n" +
-      "  Luiz P. \"Bills\" Brandao\n\n" +
-      "Music by\n" +
-      "  \"FoxSynergy\"\n\n" +
+      "  Luiz P. \"Bills\"\n\n" +
       "Art by\n" +
       "  The Legend of Zelda ALttP\n\n" +
       "Special Thanks to\n" +

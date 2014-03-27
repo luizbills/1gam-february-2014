@@ -1,14 +1,12 @@
-
-State.Game = function (game) {
-
-};
+State.Game = function(game) {};
 
 State.Game.prototype = {
 
-  create: function () {
+  create: function() {
     gameObject['ground'] = this.add.tileSprite(0, 0, config.width, config.height, 'tile');
 
-    gameObject['balls-group'] = this.add.group();
+    gameObject['big-balls-group'] = this.add.group();
+    gameObject['small-balls-group'] = this.add.group();
     gameObject['crystals-group'] = this.add.group();
 
     gameObject['score'] = this.add.text(this.world.centerX, 0, "000000", {
@@ -16,13 +14,15 @@ State.Game.prototype = {
       fill: "#ffffff"
     });
 
+    this.physics.startSystem(Phaser.Physics.ARCADE);
+
     gameObject['score'].fixedToCamera = true;
 
     this.timers = {};
 
     this.timers['ball-spawn'] = this.time.events.loop(Phaser.Timer.SECOND * 1.5, this.createBall, this);
     this.timers['crystal-spawn'] = this.time.events.loop(Phaser.Timer.SECOND * 5, this.createCrystal, this);
-    this.timers['velocity'] = this.time.events.loop(Phaser.Timer.SECOND * 20, this.increaseVelocity, this);
+    this.timers['velocity'] = this.time.events.loop(Phaser.Timer.SECOND * 10, this.increaseVelocity, this);
 
     this.createLink();
 
@@ -30,6 +30,7 @@ State.Game.prototype = {
   },
 
   quitGame: function() {
+
     this.time.events.remove(this.timers['ball-spawn']);
     this.time.events.remove(this.timers['crystal-spawn']);
     this.time.events.remove(this.timers['velocity']);
@@ -40,24 +41,26 @@ State.Game.prototype = {
     this.game.state.start('GameOver', true, false);
   },
 
-  _objectVelocity: 300,
+  _objectVelocity: 350,
   _tileVelocity: 5,
 
   increaseVelocity: function() {
-    this._objectVelocity += 20;
-    this._tileVelocity += 0.02;
+    this._objectVelocity += 50;
+    this._tileVelocity += 0.5;
   },
 
-  update: function () {
+  update: function() {
     var ground = gameObject['ground'];
     var link = gameObject['link'];
-    var balls = gameObject['balls-group'];
+    var bigBalls = gameObject['big-balls-group'];
+    var smallBalls = gameObject['small-balls-group'];
     var crystals = gameObject['crystals-group'];
 
     ground.tilePosition.y += this._tileVelocity;
 
-    this.physics.collide(link, balls, this.onBallCollision, null, this);
-    this.physics.collide(link, crystals, this.onCrystalCollision, null, this);
+    this.physics.arcade.collide(link, bigBalls, this.onBallCollision, null, this);
+    this.physics.arcade.collide(link, smallBalls, this.onBallCollision, null, this);
+    this.physics.arcade.collide(link, crystals, this.onCrystalCollision, null, this);
   },
 
   onBallCollision: function(link, ball) {
@@ -65,10 +68,9 @@ State.Game.prototype = {
   },
 
   onCrystalCollision: function(link, crystal) {
-    var tween;
     crystal.kill();
-    if (crystal.frame === 1) {
-      this.updateScore(100);
+    if (crystal.isRed) {
+      this.updateScore(50);
     } else {
       this.updateScore(5);
     }
@@ -84,6 +86,10 @@ State.Game.prototype = {
 
     link.animations.add('walk');
     link.animations.play('walk', 8, true);
+
+    this.physics.arcade.enable(link);
+
+    link.body.moves = false;
     link.body.immovable = true;
 
     keyRight = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
@@ -92,19 +98,21 @@ State.Game.prototype = {
     keyLeft = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     keyLeft.onDown.add(this.moveToLeft, this);
 
-    this.enableMoviment();
+    this.linkIsMoving = false;
   },
 
   moveToRight: function() {
     var link = gameObject['link'],
       tween;
 
-    if (!this.linkIsMoving && link.x + 64 < config.width) {
+    if (!this.linkIsMoving && link.x + 64 !== config.width) {
       this.linkIsMoving = true;
 
-      tween = this.add.tween(link)
-        .to({ x: '+64'}, 300, Phaser.Easing.Linear.None)
-        .start();
+      var tween = this.add.tween(link);
+
+      tween.to({
+        x: '+64'
+      }, 300, Phaser.Easing.Linear.None, true);
 
       tween.onComplete.add(this.enableMoviment, this);
     }
@@ -117,11 +125,14 @@ State.Game.prototype = {
     if (!this.linkIsMoving && link.x - 64 >= 0) {
       this.linkIsMoving = true;
 
-      tween = this.add.tween(link)
-        .to({ x: '-64'}, 300, Phaser.Easing.Linear.None)
-        .start();
+      var tween = this.add.tween(link);
+
+      tween.to({
+        x: '-64'
+      }, 300, Phaser.Easing.Linear.None);
 
       tween.onComplete.add(this.enableMoviment, this);
+      tween.start();
     }
   },
 
@@ -133,10 +144,9 @@ State.Game.prototype = {
   lastBallIsBig: false,
 
   createBall: function() {
-    var balls = gameObject['balls-group'];
     var column;
+    var isBig = this.rnd.realInRange(0, 1) > 0.7;
     var ball;
-    var isBig = this.rnd.realInRange(0, 1)
 
     do {
       column = this.rnd.integerInRange(0, 3);
@@ -144,24 +154,62 @@ State.Game.prototype = {
 
     this.lastBallColumn = column;
 
-    if (isBig >= 0.60) {
-      if (column === 3) column = 2;
-      ball = balls.create(64 * column, -128, 'ball-big');
-      ball.body.setRectangle(104, 104, 12, 12);
+    if (isBig) {
+      if (column === 3) {
+        column = 2;
+      }
+      ball = this._createBigBall(column);
       this.lastBallIsBig = true;
     } else {
-      ball = balls.create(64 * column, -64, 'ball');
-      ball.body.setRectangle(52, 52, 6, 6);
+      ball = this._createSmallBall(column);
       this.lastBallIsBig = false;
     }
 
-    ball.events.onOutOfBounds.add(this.onBallOutOfBounds, this);
-    ball.outOfBoundsKill = true;
-
-    ball.animations.add('roll');
-    ball.animations.play('roll', 6, true);
-
     ball.body.velocity.y = this._objectVelocity;
+  },
+
+  _createSmallBall: function(column) {
+    var balls = gameObject['small-balls-group'];
+    var ball = balls.getFirstExists(false);
+
+    if (ball) {
+      ball.reset(64 * column, -64);
+    } else {
+      ball = balls.create(64 * column, -64, 'ball');
+      this.physics.arcade.enable(ball);
+      this.lastBallIsBig = false;
+      ball.checkWorldBounds = true;
+      ball.outOfBoundsKill = true;
+      ball.events.onOutOfBounds.add(this.onBallOutOfBounds, this);
+      ball.animations.add('roll');
+    }
+
+    ball.animations.play('roll', 6, true);
+    ball.body.setSize(52, 52, 6, 6);
+
+    return ball;
+  },
+
+  _createBigBall: function(column) {
+    var balls = gameObject['big-balls-group'];
+    var ball = balls.getFirstExists(false);
+
+    if (ball) {
+      ball.reset(64 * column, -128);
+    } else {
+      ball = balls.create(64 * column, -128, 'ball-big');
+      this.physics.arcade.enable(ball);
+      this.lastBallIsBig = false;
+      ball.checkWorldBounds = true;
+      ball.outOfBoundsKill = true;
+      ball.events.onOutOfBounds.add(this.onBallOutOfBounds, this);
+      ball.animations.add('roll');
+    }
+
+    ball.animations.play('roll', 6, true);
+    ball.body.setSize(104, 104, 12, 12);
+
+    return ball;
   },
 
   onBallOutOfBounds: function(ball) {
@@ -178,34 +226,35 @@ State.Game.prototype = {
     var crystals = gameObject['crystals-group'];
     var column;
     var crystal;
-    var isRed = this.rnd.realInRange(0, 1);
+    var rnd = this.rnd.realInRange(0, 1);
 
     do {
       column = this.rnd.integerInRange(0, 3);
-    } while (
-      (this.lastBallIsBig &&
-        (column === this.lastBallColumn || column === this.lastBallColumn + 1))
-      ||column === this.lastBallColumn
-    );
+    } while ((this.lastBallIsBig && (column === this.lastBallColumn || column === this.lastBallColumn + 1)) || column === this.lastBallColumn);
 
     this.lastCrystalColumn = column;
 
-    crystal = crystals.create(64 * column, -64, 'crystal');
+    crystal = crystals.getFirstExists(false);
 
-    if (isRed > 0.80) {
-      crystal.frame = 1;
+    if (crystal) {
+      crystal.reset(64 * column, -64);
+    } else {
+      crystal = crystals.create(64 * column, -64, 'crystal');
+      crystal.checkWorldBounds = true;
+      crystal.outOfBoundsKill = true;
+      this.physics.arcade.enable(crystal);
     }
 
-    crystal.outOfBoundsKill = true;
-
-    // setup collision of the crystals
-    crystal.body.setRectangle(60, 60, 2, 2);
+    crystal.body.setSize(60, 60, 2, 2);
     crystal.body.velocity.y = this._objectVelocity + 100;
+
+    crystal.isRed = (rnd > 0.8 ? true : false);
+    crystal.frame = (crystal.isRed ? 1 : 0);
   },
 
   updateScore: function(value) {
     globalScore += value;
-    gameObject['score'].content = Phaser.Utils.pad(globalScore + "", 6, "0", 1);
+    gameObject['score'].text = Phaser.Utils.pad(globalScore + "", 6, "0", 1);
   }
 
 };

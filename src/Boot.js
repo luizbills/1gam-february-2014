@@ -1,52 +1,41 @@
-State.Boot = function (game) {
-};
+State.Boot = function(game) {};
 
 State.Boot.prototype = {
 
-    preload: function () {
+  create: function() {
+    this.input.maxPointers = 1;
+    this.stage.disableVisibilityChange = false;
 
-        //Here we load the assets required for our preloader (in this case a background and a loading bar)
-        //this.load.image('preloaderBackground', 'images/preloader_background.jpg');
-        //this.load.image('preloaderBar', 'images/preloadr_bar.png');
-
-    },
-
-    create: function () {
-        this.game.input.maxPointers = 1;
-        this.game.stage.disableVisibilityChange = false;
-
-        this.game.stage.scaleMode = Phaser.StageScaleMode.SHOW_ALL;
-
-        this.game.stage.scale.minWidth = config.width;
-        this.game.stage.scale.minHeight = config.height;
-        this.game.stage.scale.maxWidth = config.width;
-        this.game.stage.scale.maxHeight = config.height;
-
-        this.game.stage.scale.pageAlignHorizontally = true;
-        this.game.stage.scale.pageAlignVertically = true;
-        this.game.stage.scale.setScreenSize(true);
-        this.game.stage.scale.hasResized.add(this.gameResized, this);
-
-        if (!this.game.device.desktop) {
-            this.game.stage.scale.forceOrientation(false, true);
-            this.game.stage.scale.enterIncorrectOrientation.add(this.enterIncorrectOrientation, this);
-            this.game.stage.scale.leaveIncorrectOrientation.add(this.leaveIncorrectOrientation, this);
-        }
-
-        this.game.state.start('Preloader');
-    },
-
-    gameResized: function (width, height) {
-        // This could be handy if you need to do any extra processing if the game resizes.
-        // A resize could happen if for example swapping orientation on a device.
-    },
-
-    enterIncorrectOrientation: function () {
-
-    },
-
-    leaveIncorrectOrientation: function () {
-
+    // debug only
+    if (this.game.net.getHostName() === 'localhost') { // debug
+      var viewportStyle = document.querySelector('#' + config.id).style;
+      this.game.canvas.style.border = '1px solid white';
+      console.log('DEBUG MODE');
     }
 
+    if (this.game.device.desktop) {
+      // configuration to itch.io
+      if (this.game.net.getHostName().indexOf('itch.io') !== -1) {
+        document.body.style.width = config.width + 'px';
+        document.body.style.height = config.height + 'px';
+      } else {
+        this.scale.pageAlignHorizontally = true;
+        this.scale.pageAlignVertically = true;
+      }
+
+      this.scale.minWidth = config.width;
+      this.scale.minHeight = config.height;
+      this.scale.maxWidth = config.width;
+      this.scale.maxHeight = config.height;
+
+      this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    } else {
+      // mobile
+      this.scale.forceOrientation(false, true);
+    }
+
+    this.scale.setScreenSize(true);
+
+    this.state.start('Preloader');
+  }
 };
