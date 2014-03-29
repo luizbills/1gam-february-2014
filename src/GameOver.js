@@ -13,7 +13,7 @@ State.GameOver.prototype = {
 
     t1.anchor.x = 0.5;
 
-    msg = "ENTER to restart";
+    msg = (this.game.device.desktop && config.NotForceMobile ? "ENTER" : "TOUCH") + " to restart";
 
     var t2 = this.add.text(this.world.centerX, t1.y + t1._height + 50, msg, {
       font: "20px Arial",
@@ -35,8 +35,13 @@ State.GameOver.prototype = {
       .loop()
       .start();
 
-    this.keyEnter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-    this.keyEnter.onDown.add(this.returnToMenu, this);
+    if (this.game.device.desktop && config.NotForceMobile) {
+      this.keyEnter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+      this.keyEnter.onDown.add(this.returnToMenu, this);
+    } else {
+      t2.inputEnabled = true;
+      t2.events.onInputDown.add(this.returnToMenu, this);
+    }
   },
 
   returnToMenu: function() {

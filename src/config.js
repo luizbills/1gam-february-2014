@@ -1,7 +1,8 @@
 window.config = {
   width: 256,
   height: 512,
-  id: 'game-viewport'
+  id: 'game-viewport',
+  NotForceMobile: true // to debug touch
 };
 
 window.State = {};

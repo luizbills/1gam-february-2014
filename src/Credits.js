@@ -7,24 +7,32 @@ State.Credits.prototype = {
       "Coder & Design\n" +
       "  Luiz P. \"Bills\"\n\n" +
       "Art by\n" +
-      "  The Legend of Zelda ALttP\n\n" +
+      "  User Interface by Kenney\n" +
+      "  Sprites of The Legend of Zelda\n\n" +
       "Special Thanks to\n" +
-      "  Carlos \"Dudu\"";
+      "  Carlos Eduardo \"Dudu\" Papa\n" +
+      "  Marlon Renan M. da Costa";
 
     this.add.text(20, 50, text, {
-      font: "20px Arial bold",
+      font: "16px Arial bold",
       fill: "#888888",
       align: "left"
     });
 
-    this.add.text(this.world.centerX, config.height - 50, "press ENTER to return", {
+    text = (this.game.device.desktop && config.NotForceMobile ? "ENTER" : "TOUCH") + " to return";
+
+    this.add.text(this.world.centerX, config.height - 50, text, {
       font: "15px Arial",
       fill: "#888888",
       align: "center"
     }).anchor.x = 0.5;
 
-    this.keyEnter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-    this.keyEnter.onDown.add(this.returnToMenu, this);
+    if (this.game.device.desktop && config.NotForceMobile) {
+      this.keyEnter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+      this.keyEnter.onDown.add(this.returnToMenu, this);
+    } else {
+      this.game.input.onTap.add(this.returnToMenu, this);
+    }
   },
 
   returnToMenu: function() {

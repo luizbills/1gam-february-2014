@@ -13,24 +13,26 @@ State.Boot.prototype = {
       console.log('DEBUG MODE');
     }
 
+    this.scale.minWidth = config.width;
+    this.scale.minHeight = config.height;
+    this.scale.maxWidth = config.width;
+    this.scale.maxHeight = config.height;
+
     if (this.game.device.desktop) {
       // configuration to itch.io
       if (document.URL.indexOf('itchio') !== -1) {
+        document.body.style.margin = "0";
         document.body.style.width = config.width + 'px';
-        document.body.style.height = config.height + 1 + 'px';
+        document.body.style.height = config.height + 'px';
       } else {
         this.scale.pageAlignHorizontally = true;
         this.scale.pageAlignVertically = true;
       }
 
-      this.scale.minWidth = config.width;
-      this.scale.minHeight = config.height;
-      this.scale.maxWidth = config.width;
-      this.scale.maxHeight = config.height;
-
       this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     } else {
       // mobile
+      this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT
       this.scale.forceOrientation(false, true);
     }
 

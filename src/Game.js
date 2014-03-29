@@ -30,13 +30,12 @@ State.Game.prototype = {
   },
 
   quitGame: function() {
+    this.input.keyboard.removeKey(Phaser.Keyboard.LEFT);
+    this.input.keyboard.removeKey(Phaser.Keyboard.RIGHT);
 
     this.time.events.remove(this.timers['ball-spawn']);
     this.time.events.remove(this.timers['crystal-spawn']);
     this.time.events.remove(this.timers['velocity']);
-
-    this.input.keyboard.removeKey(Phaser.Keyboard.RIGHT);
-    this.input.keyboard.removeKey(Phaser.Keyboard.LEFT);
 
     this.game.state.start('GameOver', true, false);
   },
@@ -92,11 +91,24 @@ State.Game.prototype = {
     link.body.moves = false;
     link.body.immovable = true;
 
-    keyRight = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-    keyRight.onDown.add(this.moveToRight, this);
+    if (this.game.device.desktop && config.NotForceMobile) {
+      keyRight = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+      keyRight.onDown.add(this.moveToRight, this);
 
-    keyLeft = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-    keyLeft.onDown.add(this.moveToLeft, this);
+      keyLeft = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+      keyLeft.onDown.add(this.moveToLeft, this);
+    } else {
+      gameObject['control-left'] = this.add.sprite(0, config.height, 'control');
+      gameObject['control-left'].anchor.y = 1;
+      gameObject['control-left'].inputEnabled = true;
+      gameObject['control-left'].events.onInputDown.add(this.moveToLeft, this);
+
+      gameObject['control-right'] = this.add.sprite(config.width, config.height, 'control');
+      gameObject['control-right'].anchor.y = 1;
+      gameObject['control-right'].scale.x = -1;
+      gameObject['control-right'].inputEnabled = true;
+      gameObject['control-right'].events.onInputDown.add(this.moveToRight, this);
+    }
 
     this.linkIsMoving = false;
   },

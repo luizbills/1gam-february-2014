@@ -24,17 +24,24 @@ State.MainMenu.prototype = {
     credits.anchor.x = 0.5;
 
     this.currentOption = 0;
+    this.options = [start, help, credits]; // menu options
 
-    if (this.game.device.desktop) {
-      this.options = [start, help, credits];
-
+    if (this.game.device.desktop && config.NotForceMobile) {
       this.keyUp = this.input.keyboard.addKey(Phaser.Keyboard.UP);
-      this.keyDown = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-      this.keyEnter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-
       this.keyUp.onDown.add(this.processKey, this);
+
+      this.keyDown = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
       this.keyDown.onDown.add(this.processKey, this);
+
+      this.keyEnter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
       this.keyEnter.onDown.add(this.changeState, this);
+    } else {
+      var i = 0;
+      for (; i < this.options.length; i++) {
+        this.options[i].__optionIndex = i;
+        this.options[i].inputEnabled = true;
+        this.options[i].events.onInputDown.add(this.processTouch, this);
+      }
     }
   },
 
@@ -64,11 +71,12 @@ State.MainMenu.prototype = {
     this.options[this.currentOption].setStyle(this._styleSelected);
   },
 
-  processTouch: function() {
-    // TODO: implement mobile input
+  processTouch: function(object, pointer) {
+    this.currentOption = object.__optionIndex;
+    this.changeState();
   },
 
-  changeState: function(pointer) {
+  changeState: function() {
     this.input.keyboard.removeKey(Phaser.Keyboard.UP);
     this.input.keyboard.removeKey(Phaser.Keyboard.DOWN);
     this.input.keyboard.removeKey(Phaser.Keyboard.ENTER);
