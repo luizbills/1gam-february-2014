@@ -13,12 +13,12 @@ State.Boot.prototype = {
       console.log('DEBUG MODE');
     }
 
-    this.scale.minWidth = config.width;
-    this.scale.minHeight = config.height;
-    this.scale.maxWidth = config.width;
-    this.scale.maxHeight = config.height;
+    this.game.stage.smoothed = true;
 
     if (this.game.device.desktop) {
+      this.scale.maxWidth = config.width;
+      this.scale.maxHeight = config.height;
+
       // configuration to itch.io
       if (document.URL.indexOf('itchio') !== -1) {
         document.body.style.margin = "0";

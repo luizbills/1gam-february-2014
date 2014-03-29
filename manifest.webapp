@@ -1,0 +1,16 @@
+{
+  "name": "RunLink",
+  "version": "1.0",
+  "launch_path": "/index.html",
+  "description": "an game made based on Legend of Zelda (made with Phaser)",
+  "permissions": {
+  },
+  "developer": {
+    "name": "Luiz \"Bills\"",
+    "url": "http://about.me/luizbills"
+  },
+  "icons": {
+    "60": "/icons/run-link-60.png",
+    "128": "/icons/run-link-128.png"
+  }
+}

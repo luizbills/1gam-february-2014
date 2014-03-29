@@ -6,10 +6,10 @@ State.Credits.prototype = {
     var text =
       "Coder & Design\n" +
       "  Luiz P. \"Bills\"\n\n" +
-      "Art by\n" +
+      "Art\n" +
       "  User Interface by Kenney\n" +
       "  Sprites of The Legend of Zelda\n\n" +
-      "Special Thanks to\n" +
+      "Testers\n" +
       "  Carlos Eduardo \"Dudu\" Papa\n" +
       "  Marlon Renan M. da Costa";
 
